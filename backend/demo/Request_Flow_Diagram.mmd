@@ -1,0 +1,68 @@
+sequenceDiagram
+    participant C as React Client
+    participant LB as Load Balancer
+    participant GW as API Gateway
+    participant APP as Spring Boot
+    participant CACHE as Redis Cache
+    participant DB as MySQL Primary
+    participant Q as Redis Queue
+    participant W as Worker
+    participant AI as OpenAI API
+
+    Note over C,AI: Synchronous Request Flow - NL to SQL
+
+    C->>LB: POST /api/v1/queries/nl-to-sql
+    LB->>GW: Forward request
+    GW->>GW: Validate JWT + Rate limit
+    GW->>APP: Route to NL Query Module
+
+    APP->>CACHE: Check schema cache
+    alt Cache Hit
+        CACHE-->>APP: Return cached schema
+    else Cache Miss
+        APP->>DB: Fetch schema metadata
+        DB-->>APP: Schema data
+        APP->>CACHE: Store with TTL 1hr
+    end
+
+    APP->>CACHE: Check query cache by hash
+    alt Exact Query Cached
+        CACHE-->>APP: Return cached result
+        APP-->>C: 200 OK with result
+    else Not Cached
+        APP->>AI: Send schema + NL prompt
+        AI-->>APP: Generated SQL
+        APP->>DB: Log query + usage
+        APP->>CACHE: Cache result TTL 15min
+        APP-->>C: 200 OK with SQL + preview
+    end
+
+    Note over C,AI: Async Job Flow - Schema Extraction
+
+    C->>APP: POST /api/v1/data-sources/sync
+    APP->>DB: Create job record
+    APP->>Q: Enqueue SCHEMA_EXTRACT job
+    APP-->>C: 202 Accepted with job ID
+
+    Q->>W: Dequeue job
+    W->>W: Connect to external DB
+    W->>W: Extract tables + columns + FKs
+    W->>DB: Store schema snapshot
+    W->>Q: Enqueue DATA_QUALITY job
+    W->>DB: Update job status COMPLETED
+
+    C->>APP: GET /api/v1/jobs/job-id/status
+    APP->>DB: Check job status
+    APP-->>C: 200 OK status COMPLETED
+
+    Note over C,AI: Async Job Flow - AI Insight Generation
+
+    Q->>W: Dequeue INSIGHT_GEN job
+    W->>DB: Load schema + quality metrics
+    W->>W: Chunk schema if over 100 tables
+    W->>AI: Send chunk 1 with analysis prompt
+    AI-->>W: Partial insights
+    W->>AI: Send chunk 2 with context
+    AI-->>W: More insights
+    W->>DB: Store insights + usage tracking
+    W->>DB: Update job status COMPLETED

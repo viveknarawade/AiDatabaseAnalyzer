@@ -1,0 +1,272 @@
+erDiagram
+    users {
+        bigint id PK
+        varchar_100 email UK
+        varchar_255 password_hash
+        varchar_100 full_name
+        varchar_255 avatar_url
+        enum status
+        timestamp email_verified_at
+        timestamp last_login_at
+        timestamp created_at
+        timestamp updated_at
+    }
+    
+
+    roles {
+        bigint id PK
+        varchar_50 name UK
+        varchar_255 description
+        timestamp created_at
+    }
+
+    user_roles {
+        bigint id PK
+        bigint user_id FK
+        bigint role_id FK
+        timestamp assigned_at
+    }
+
+    refresh_tokens {
+        bigint id PK
+        bigint user_id FK
+        varchar_512 token_hash UK
+        timestamp expires_at
+        boolean revoked
+        timestamp created_at
+    }
+
+    projects {
+        bigint id PK
+        bigint owner_id FK
+        varchar_150 name
+        text description
+        enum status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    project_members {
+        bigint id PK
+        bigint project_id FK
+        bigint user_id FK
+        enum role
+        timestamp joined_at
+    }
+
+    data_sources {
+        bigint id PK
+        bigint project_id FK
+        varchar_100 name
+        enum db_type
+        varchar_255 host
+        int port
+        varchar_100 database_name
+        blob encrypted_credentials
+        boolean ssl_enabled
+        enum connection_status
+        timestamp last_synced_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    schema_tables {
+        bigint id PK
+        bigint data_source_id FK
+        varchar_150 table_name
+        varchar_100 table_schema
+        enum table_type
+        bigint estimated_row_count
+        varchar_255 table_comment
+        int snapshot_version
+        timestamp extracted_at
+    }
+
+    schema_columns {
+        bigint id PK
+        bigint schema_table_id FK
+        varchar_150 column_name
+        varchar_100 data_type
+        varchar_100 column_type_full
+        boolean is_nullable
+        text column_default
+        varchar_50 column_key
+        varchar_255 column_comment
+        int ordinal_position
+        bigint char_max_length
+        int numeric_precision
+        int numeric_scale
+    }
+
+    schema_relationships {
+        bigint id PK
+        bigint data_source_id FK
+        bigint source_table_id FK
+        bigint source_column_id FK
+        bigint target_table_id FK
+        bigint target_column_id FK
+        varchar_150 constraint_name
+        enum relationship_type
+    }
+
+    data_quality_reports {
+        bigint id PK
+        bigint data_source_id FK
+        bigint triggered_by FK
+        enum status
+        json summary_metrics
+        timestamp started_at
+        timestamp completed_at
+        timestamp created_at
+    }
+
+    data_quality_metrics {
+        bigint id PK
+        bigint report_id FK
+        bigint schema_table_id FK
+        bigint schema_column_id FK
+        decimal completeness_pct
+        decimal uniqueness_pct
+        decimal validity_pct
+        bigint null_count
+        bigint distinct_count
+        bigint total_count
+        json anomalies
+    }
+
+    ai_summaries {
+        bigint id PK
+        bigint project_id FK
+        bigint data_source_id FK
+        bigint requested_by FK
+        enum summary_type
+        text prompt_used
+        text response_content
+        int tokens_input
+        int tokens_output
+        varchar_50 model_used
+        int latency_ms
+        enum status
+        timestamp created_at
+    }
+
+    nl_queries {
+        bigint id PK
+        bigint project_id FK
+        bigint data_source_id FK
+        bigint user_id FK
+        text natural_language_input
+        text generated_sql
+        json query_result_preview
+        int result_row_count
+        int execution_time_ms
+        int tokens_used
+        boolean user_approved
+        text user_feedback
+        enum status
+        timestamp created_at
+    }
+
+    insights {
+        bigint id PK
+        bigint project_id FK
+        bigint data_source_id FK
+        bigint generated_by_job FK
+        varchar_200 title
+        text summary
+        enum severity
+        varchar_100 category
+        json supporting_data
+        int tokens_used
+        enum status
+        timestamp created_at
+    }
+
+    data_dictionary_entries {
+        bigint id PK
+        bigint schema_column_id FK
+        bigint updated_by FK
+        text ai_description
+        text user_description
+        json tags
+        json sample_values
+        json business_rules
+        timestamp last_ai_update
+        timestamp last_user_update
+    }
+
+    job_queue {
+        bigint id PK
+        varchar_50 job_type
+        bigint project_id FK
+        bigint data_source_id FK
+        bigint created_by FK
+        json payload
+        enum status
+        int priority
+        int attempt_count
+        int max_attempts
+        text error_message
+        varchar_100 worker_id
+        timestamp scheduled_at
+        timestamp started_at
+        timestamp completed_at
+        timestamp created_at
+    }
+
+    audit_logs {
+        bigint id PK
+        bigint user_id FK
+        varchar_50 action
+        varchar_100 resource_type
+        bigint resource_id
+        json old_values
+        json new_values
+        varchar_45 ip_address
+        varchar_512 user_agent
+        timestamp created_at
+    }
+
+    usage_tracking {
+        bigint id PK
+        bigint user_id FK
+        bigint project_id FK
+        varchar_50 operation_type
+        varchar_50 ai_model
+        int tokens_input
+        int tokens_output
+        decimal estimated_cost_usd
+        timestamp created_at
+    }
+
+    users ||--o{ user_roles : has
+    roles ||--o{ user_roles : assigned_to
+    users ||--o{ refresh_tokens : owns
+    users ||--o{ projects : owns
+    projects ||--o{ project_members : has
+    users ||--o{ project_members : belongs_to
+    projects ||--o{ data_sources : contains
+    data_sources ||--o{ schema_tables : extracted_from
+    schema_tables ||--o{ schema_columns : has
+    data_sources ||--o{ schema_relationships : has
+    schema_tables ||--o{ schema_relationships : source
+    schema_tables ||--o{ schema_relationships : target
+    schema_columns ||--o{ schema_relationships : source_col
+    schema_columns ||--o{ schema_relationships : target_col
+    data_sources ||--o{ data_quality_reports : analyzed_by
+    data_quality_reports ||--o{ data_quality_metrics : contains
+    schema_tables ||--o{ data_quality_metrics : measured
+    schema_columns ||--o{ data_quality_metrics : measured
+    projects ||--o{ ai_summaries : has
+    data_sources ||--o{ ai_summaries : about
+    projects ||--o{ nl_queries : has
+    data_sources ||--o{ nl_queries : targets
+    users ||--o{ nl_queries : authored
+    projects ||--o{ insights : has
+    data_sources ||--o{ insights : about
+    schema_columns ||--o{ data_dictionary_entries : documented
+    projects ||--o{ job_queue : schedules
+    data_sources ||--o{ job_queue : targets
+    users ||--o{ audit_logs : performed
+    users ||--o{ usage_tracking : tracked
+    projects ||--o{ usage_tracking : billed_to

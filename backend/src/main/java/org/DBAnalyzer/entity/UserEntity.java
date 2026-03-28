@@ -9,6 +9,7 @@ import java.time.Instant;
 @Entity
 @Getter
 @Setter
+@Table(name = "users")
 public class UserEntity {
 
     @Id
@@ -25,7 +26,7 @@ public class UserEntity {
     private String avatarUrl;
 
 
-    private String status="ACTIVE";
+    private String status="PENDING"; //PENDING ACTIVE DELETED
 
     @Column(name = "last_login")
     private Instant lastLogin;

@@ -1,5 +1,6 @@
 package org.TaskManager.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
+@Valid
 public class LoginRequestDto {
 
     @NotBlank(message = "Email is required")

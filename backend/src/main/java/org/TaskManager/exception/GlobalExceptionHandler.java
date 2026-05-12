@@ -35,6 +35,10 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.CONFLICT, "Conflict", ex.getMessage(), request);
     }
 
+    public ResponseEntity<ApiError> handleAccountDeleted(AccountDeletedException ex,HttpServletRequest request){
+        return  buildErrorResponse(HttpStatus.CONFLICT,"Conflict",ex.getMessage(),request);
+    }
+
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ApiError> handleUserNotFound(UsernameNotFoundException ex, HttpServletRequest request) {
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage(), request);

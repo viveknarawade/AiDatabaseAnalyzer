@@ -27,33 +27,39 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String email) {
+
+    public String generateToken(String userId) {
         return Jwts.builder()
-                .subject(email)
+                .subject(userId)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + accessExpiration.toMillis()))
                 .signWith(getSignKey())
                 .compact();
     }
 
-    public String generateRefreshToken(String email) {
+
+
+    public String generateRefreshToken(String userId) {
         return Jwts.builder()
-                .subject(email)
+                .subject(userId)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + refreshExpiration.toMillis()))
                 .signWith(getSignKey())
                 .compact();
     }
 
-    public String getEmailFromToken(String token) {
+    public Long getUserIdFromToken(String token) {
+
         Claims claims = Jwts.parser()
                 .verifyWith(getSignKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
 
-        return claims.getSubject();
+        return Long.parseLong(claims.getSubject());
     }
+
+
 
     public String generateEmailVerificationToken(String email) {
         log.info("varification email :{}",email);
@@ -64,9 +70,8 @@ public class JwtService {
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30)) // 30 min
                 .signWith(getSignKey())
                 .compact();
-
-
     }
+
     public String extractEmail(String token) {
         return Jwts.parser()
                 .verifyWith(getSignKey())

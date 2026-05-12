@@ -1,6 +1,8 @@
 package org.TaskManager.service;
 
+import jakarta.validation.Valid;
 import org.TaskManager.dto.*;
+import org.TaskManager.exception.AccountDeletedException;
 
 public interface AuthService {
 
@@ -14,4 +16,6 @@ public interface AuthService {
     void verifyEmail(String token);
 
     void resendVerification(String email);
+
+    void delete(@Valid DeleteRequestDto deleteDto) throws AccountDeletedException;
 }

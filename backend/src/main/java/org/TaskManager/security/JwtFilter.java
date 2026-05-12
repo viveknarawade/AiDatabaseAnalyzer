@@ -28,7 +28,6 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final HandlerExceptionResolver handlerExceptionResolver;
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
        try {
@@ -40,22 +39,19 @@ public class JwtFilter extends OncePerRequestFilter {
                filterChain.doFilter(request, response);
                return;
            }
-
            String token = requestTokenHeader.substring(7);
-           String email = jwtService.getEmailFromToken(token);
+           Long userId = jwtService.getUserIdFromToken(token);
 
-           if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-               UserEntity user = authRepo.findByEmail(email)
-                       .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+           if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+               UserEntity user = authRepo.findById(userId)
+                       .orElseThrow(() ->
+                               new UsernameNotFoundException("User not found"));
 
                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                        user,
                        null,
                        java.util.Collections.emptyList()
                );
-
-
                authToken.setDetails(new org.springframework.security.web.authentication.WebAuthenticationDetailsSource().buildDetails(request));
 
 

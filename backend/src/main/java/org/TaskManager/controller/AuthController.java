@@ -15,8 +15,6 @@ import java.time.Instant;
 @RestController
 public class AuthController {
 
-
-
     @Autowired
     private AuthService authService;
 
@@ -36,6 +34,7 @@ public class AuthController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponseDto>> login(@Valid @RequestBody LoginRequestDto loginDto) {
 
@@ -68,6 +67,20 @@ public class AuthController {
         return  ResponseEntity.ok(response);
     }
 
+
+    @PostMapping("/delete-account")
+    public ResponseEntity<ApiResponse<Void>> deleteAccount(@Valid @RequestBody DeleteRequestDto deleteDto){
+        authService.delete(deleteDto);
+
+        ApiResponse<Void> response = new ApiResponse<>(
+                true,
+                "Account deleted successfully",
+                200,
+                Instant.now(),
+                null
+        );
+        return  ResponseEntity.ok(response);
+    }
 
     @GetMapping("/verify-email")
     public ResponseEntity<ApiResponse<String>> verifyEmail(@RequestParam String token) {

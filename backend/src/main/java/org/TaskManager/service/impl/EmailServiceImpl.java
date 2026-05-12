@@ -26,13 +26,13 @@ public class EmailServiceImpl implements EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-            helper.setFrom("AI Analyzer <" + sender + ">");
+            helper.setFrom("Task Manager <" + sender + ">");
             helper.setTo(toEmail);
             helper.setSubject("Verify Your Account");
 
             String htmlContent = """
                     <div style="font-family: Arial, sans-serif; padding: 20px;">
-                        <h2>Welcome to AI Analyzer 🚀</h2>
+                        <h2>Welcome to Task Manager 🚀</h2>
                         <p>Please verify your email by clicking the button below:</p>
                         
                         <a href="%s" target="_blank"
@@ -51,7 +51,7 @@ public class EmailServiceImpl implements EmailService {
                     </div>
                     """.formatted(link);
 
-            helper.setText(htmlContent, true); // true = HTML
+            helper.setText(htmlContent, true);
 
             mailSender.send(message);
 

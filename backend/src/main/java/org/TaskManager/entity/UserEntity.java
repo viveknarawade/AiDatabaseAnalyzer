@@ -27,6 +27,10 @@ public class UserEntity {
 
 
     private String status="PENDING"; //PENDING ACTIVE DELETED
+    private  boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 
     @Column(name = "last_login")
     private Instant lastLogin;

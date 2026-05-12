@@ -1,31 +1,32 @@
 package org.TaskManager.dto;
 
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.stereotype.Service;
+import org.TaskManager.entity.TaskPriority;
+import org.TaskManager.entity.TaskStatus;
 
 import java.time.Instant;
 
 @Getter
 @Setter
-@Valid
 public class TaskRequestDto {
 
-
-    private Long id;
+    @NotBlank(message = "Title is required")
     private String title;
-    private  String description;
-    private  String status;
-    private String priority;
+
+    @NotBlank(message = "Description is required")
+    private String description;
+
+    private TaskStatus status;
+
+    @NotNull(message = "Priority is required")
+    private TaskPriority priority;
+
+    @NotNull(message = "Due date is required")
+    @Future(message = "Due date must be future date")
     private Instant dueDate;
-
-    private Instant createdAt;
-    private  Instant updatedAt;
-    private  Long userId;
-
 
 }

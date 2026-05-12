@@ -104,12 +104,12 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken =
                 jwtService.generateToken(
-                        String.valueOf(user.getId())
+                        String.valueOf(user.getUserId())
                 );
 
         String refreshTokenString =
                 jwtService.generateRefreshToken(
-                        String.valueOf(user.getId())
+                        String.valueOf(user.getUserId())
                 );
 
         saveRefreshTokenToDB(user, refreshTokenString);
@@ -217,7 +217,7 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenRepo.saveAll(allToken);
 
         user.setEmail(
-                "deleted_" + user.getId() + "_" + user.getEmail()
+                "deleted_" + user.getUserId() + "_" + user.getEmail()
         );
 
         user.setDeleted(true);

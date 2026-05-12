@@ -1,19 +1,20 @@
-package org.TaskManager.dto;
+package org.TaskManager.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.TaskManager.entity.TaskPriority;
-import org.TaskManager.entity.TaskStatus;
 
 import java.time.Instant;
 
+@Entity
 @Getter
 @Setter
-public class TaskResponseDto {
+@Table(name = "tasks")
+public class TaskEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "task_id")
     private Long taskId;
 
     @Column(nullable = false)
@@ -39,4 +40,12 @@ public class TaskResponseDto {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    private boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 }

@@ -31,7 +31,7 @@ public class RefreshTokenEntity {
     private boolean revoked =false;
 
     @ManyToOne
-    @JoinColumn(name =  "user_id",referencedColumnName = "id")
+    @JoinColumn(name =  "user_id",referencedColumnName = "user_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private  UserEntity user;
 

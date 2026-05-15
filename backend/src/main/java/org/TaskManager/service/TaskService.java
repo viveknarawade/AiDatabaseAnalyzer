@@ -3,6 +3,8 @@ package org.TaskManager.service;
 import jakarta.validation.Valid;
 import org.TaskManager.dto.TaskRequestDto;
 import org.TaskManager.dto.TaskResponseDto;
+import org.TaskManager.dto.TaskUpdateRequestDto;
+import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,4 +14,8 @@ public interface TaskService {
     public TaskResponseDto createTask(TaskRequestDto taskRequestDto);
 
     List<TaskResponseDto> getTask();
+
+    void deleteTaskById(Long taskId) throws BadRequestException;
+
+    void updateTask(Long taskId,TaskUpdateRequestDto taskDto) throws BadRequestException;
 }

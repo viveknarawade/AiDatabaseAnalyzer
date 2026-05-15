@@ -11,5 +11,5 @@ import java.util.Optional;
 
 @Repository
 public interface TaskRepo extends JpaRepository<TaskEntity,Long> {
-   List<TaskEntity> findAllByUserUserId(Long userId);
+   List<TaskEntity> findAllByUserUserIdAndIsDeletedFalse(Long userId);
 }

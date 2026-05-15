@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.TaskManager.entity.UserEntity;
 import org.TaskManager.repository.AuthRepo;
 import org.TaskManager.service.impl.JwtService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,6 +27,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final AuthRepo authRepo;
     private final JwtService jwtService;
+    @Qualifier("handlerExceptionResolver")
     private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override

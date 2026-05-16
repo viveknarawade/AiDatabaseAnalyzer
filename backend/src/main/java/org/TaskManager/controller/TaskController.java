@@ -2,6 +2,7 @@ package org.TaskManager.controller;
 
 
 import jakarta.validation.Valid;
+import org.TaskManager.dto.PageResponse;
 import org.TaskManager.dto.TaskRequestDto;
 import org.TaskManager.dto.TaskResponseDto;
 import org.TaskManager.dto.TaskUpdateRequestDto;
@@ -35,18 +36,27 @@ public class TaskController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<TaskResponseDto>>> getTasks(){
-        List<TaskResponseDto> data = taskService.getTask();
-        ApiResponse<List<TaskResponseDto>> response = new ApiResponse<>(
-                true,
-                "Task created successful",
-                200,
-                Instant.now(),
-                data
-        );
+    @GetMapping("/page")
+    public ResponseEntity<ApiResponse<PageResponse<TaskResponseDto>>> getTasks(
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+
+        PageResponse<TaskResponseDto> data =
+                taskService.getTask(page, size);
+
+        ApiResponse<PageResponse<TaskResponseDto>> response =
+                new ApiResponse<>(
+                        true,
+                        "Task fetch successfully",
+                        200,
+                        Instant.now(),
+                        data
+                );
+
         return ResponseEntity.ok(response);
     }
+
     @DeleteMapping("/{taskId}")
     public ResponseEntity<ApiResponse<Object>> deleteTask(@PathVariable Long taskId) throws BadRequestException {
         taskService.deleteTaskById(taskId);

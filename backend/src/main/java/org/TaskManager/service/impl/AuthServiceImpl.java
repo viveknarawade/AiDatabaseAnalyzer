@@ -67,6 +67,7 @@ public class AuthServiceImpl implements AuthService {
             String token = jwtService.generateEmailVerificationToken(savedUser.getEmail());
             emailService.sendVerificationEmail(savedUser.getEmail(), token);
             log.info("After sending email");
+            log.info("Register email {} ",newUser.getEmail());
 
         } catch (DataIntegrityViolationException ex) {
             throw new UserAlreadyExistsException("Email already exists");
@@ -83,9 +84,7 @@ public class AuthServiceImpl implements AuthService {
                         ));
 
         if (user.isDeleted()) {
-            throw new AccountDeletedException(
-                    "Account deleted"
-            );
+            throw new AccountDeletedException("Account deleted");
         }
 
         Authentication authentication =
@@ -123,6 +122,8 @@ public class AuthServiceImpl implements AuthService {
         response.setRefreshToken(refreshTokenString);
         response.setUser(userDto);
 
+
+        log.info("User logged in email {} ", userDto.getEmail());
         return response;
     }
     @Override
@@ -141,6 +142,7 @@ public class AuthServiceImpl implements AuthService {
         user.setStatus("ACTIVE");
 
         authRepo.save(user);
+
     }
     @Override
     public void resendVerification(String email) {
@@ -174,6 +176,7 @@ public class AuthServiceImpl implements AuthService {
 
             token.setRevoked(true);
             refreshTokenRepo.save(token);
+            log.info("User log out...");
         }
 
     public void saveRefreshTokenToDB(UserEntity user,String refreshTokenString){
@@ -224,7 +227,7 @@ public class AuthServiceImpl implements AuthService {
         user.setDeletedAt(Instant.now());
         user.setStatus("DELETED");
         user.setUpdatedAt(Instant.now());
-
+        log.info("Delete account email {} ", user.getEmail());
         authRepo.save(user);
     }
 }

@@ -1,6 +1,7 @@
 package org.TaskManager.service;
 
 import jakarta.validation.Valid;
+import org.TaskManager.dto.PageResponse;
 import org.TaskManager.dto.TaskRequestDto;
 import org.TaskManager.dto.TaskResponseDto;
 import org.TaskManager.dto.TaskUpdateRequestDto;
@@ -13,7 +14,7 @@ import java.util.List;
 public interface TaskService {
     public TaskResponseDto createTask(TaskRequestDto taskRequestDto);
 
-    List<TaskResponseDto> getTask();
+    PageResponse<TaskResponseDto> getTask(int page, int size);
 
     void deleteTaskById(Long taskId) throws BadRequestException;
 

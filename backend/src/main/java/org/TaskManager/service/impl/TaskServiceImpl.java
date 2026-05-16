@@ -1,11 +1,11 @@
 package org.TaskManager.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.TaskManager.dto.PageResponse;
 import org.TaskManager.dto.TaskRequestDto;
 import org.TaskManager.dto.TaskResponseDto;
 import org.TaskManager.dto.TaskUpdateRequestDto;
-import org.TaskManager.dto.UserDto;
-import org.TaskManager.entity.RefreshTokenEntity;
 import org.TaskManager.entity.TaskEntity;
 import org.TaskManager.entity.UserEntity;
 import org.TaskManager.exception.AccountDeletedException;
@@ -15,16 +15,17 @@ import org.TaskManager.service.TaskService;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 import static org.TaskManager.entity.TaskStatus.TODO;
-
+@Slf4j
 @Service
 public class TaskServiceImpl implements TaskService {
 
@@ -47,8 +48,9 @@ public class TaskServiceImpl implements TaskService {
         }
         return  user;
     }
+
     @Override
-    public TaskResponseDto createTask(TaskRequestDto taskDto) {
+       public TaskResponseDto createTask(TaskRequestDto taskDto) {
         UserEntity user = authenticateUser();
         TaskEntity newTask= mapper.map(taskDto, TaskEntity.class);
         if(taskDto.getStatus() ==null){
@@ -59,23 +61,35 @@ public class TaskServiceImpl implements TaskService {
         newTask.setUpdatedAt(Instant.now());
         TaskEntity savedTask = taskRepo.save(newTask);
         TaskResponseDto responseDto = mapper.map(savedTask,TaskResponseDto.class);
+        log.info("Task Created ID {} and userID {}",newTask.getTaskId(),user.getUserId());
         return responseDto;
     }
 
     @Override
-    public List<TaskResponseDto> getTask() {
+    public PageResponse<TaskResponseDto> getTask(int page, int size) {
 
         UserEntity user = authenticateUser();
 
-        List<TaskEntity> taskEntityList =
-                taskRepo.findAllByUserUserIdAndIsDeletedFalse(user.getUserId());
+        Page<TaskEntity> taskPage =
+                taskRepo.findAllByUserUserIdAndIsDeletedFalse(
+                        user.getUserId(),
+                        PageRequest.of(page, size)
+                );
 
         List<TaskResponseDto> responseList =
-                taskEntityList.stream()
+                taskPage.getContent()
+                        .stream()
                         .map(task -> mapper.map(task, TaskResponseDto.class))
                         .toList();
 
-        return responseList;
+        return new PageResponse<>(
+                responseList,
+                taskPage.getNumber(),
+                taskPage.getSize(),
+                taskPage.getTotalElements(),
+                taskPage.getTotalPages(),
+                taskPage.isLast()
+        );
     }
 
     @Override
@@ -95,6 +109,7 @@ public class TaskServiceImpl implements TaskService {
         task.setDeleted(true);
         task.setDeletedAt(Instant.now());
         task.setUpdatedAt(Instant.now());
+        log.info("Deleted task ID {} and userID {} ",task.getTaskId(),user.getUserId());
         taskRepo.save(task);
     }
 
@@ -138,7 +153,7 @@ public class TaskServiceImpl implements TaskService {
         }
 
         task.setUpdatedAt(Instant.now());
-
+        log.info("updated task ID {} userId {} ",task.getTaskId(),user.getUserId());
         taskRepo.save(task);
     }
 }

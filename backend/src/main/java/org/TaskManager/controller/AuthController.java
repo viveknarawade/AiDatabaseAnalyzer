@@ -1,6 +1,7 @@
 package org.TaskManager.controller;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.TaskManager.dto.*;
 import org.TaskManager.payload.ApiResponse;
 import org.TaskManager.service.AuthService;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 
+@Slf4j
 @RequestMapping("/api/v1/auth")
 @RestController
 public class AuthController {
@@ -70,7 +72,10 @@ public class AuthController {
 
     @PostMapping("/delete-account")
     public ResponseEntity<ApiResponse<Void>> deleteAccount(@Valid @RequestBody DeleteRequestDto deleteDto){
+
+        log.info("DELETE ACCOUNT API HIT");
         authService.delete(deleteDto);
+        log.info("ACCOUNT DELETED");
 
         ApiResponse<Void> response = new ApiResponse<>(
                 true,
